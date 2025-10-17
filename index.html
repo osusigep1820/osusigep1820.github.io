@@ -367,6 +367,7 @@
             .form-row, .feedback-row { grid-template-columns: 1fr; gap: 0.5rem; }
             .form-row label, .feedback-row .label { text-align: left; margin-bottom: 0.5rem; }
         }
+
     </style>
 </head>
 <body>
@@ -375,13 +376,14 @@
         <!-- Header -->
         <header>
             <div class="header-group">
-                <span class="label">Mode:</span>
+                <span class="label">Activity:</span>
                 <div id="mode-toggle" class="toggle-switch">
-                    <button data-mode="minimal" class="active">Minimal</button>
-                    <button data-mode="advanced">Advanced</button>
+                    <button data-mode="review" class="active">Review</button>
+                    <button data-mode="minimal">Minimal Quiz</button>
+                    <button data-mode="advanced">Advanced Quiz</button>
                 </div>
             </div>
-            <div class="header-group">
+            <div id="session-group" class="header-group hidden">
                 <span class="label">Session:</span>
                 <div id="session-toggle" class="toggle-switch">
                     <button data-session="study" class="active">Study</button>
@@ -428,16 +430,16 @@
                         <!-- Indirect Mechanisms -->
                         <div id="indirect-mechanisms-container" class="hidden">
                              <div class="form-row">
-                                 <label>Indirect Mechanisms</label>
-                                 <div class="input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                                     <input type="checkbox" id="mech-release" name="indirectMechanism" value="Release" class="choice-input"><label for="mech-release" class="choice-label">Release</label>
-                                     <input type="checkbox" id="mech-reuptake" name="indirectMechanism" value="Reuptake inhibition" class="choice-input"><label for="mech-reuptake" class="choice-label">Reuptake Inhibition</label>
-                                     <input type="checkbox" id="mech-mao" name="indirectMechanism" value="MAO inhibition" class="choice-input"><label for="mech-mao" class="choice-label">MAO Inhibition</label>
-                                     <input type="checkbox" id="mech-comt" name="indirectMechanism" value="COMT inhibition" class="choice-input"><label for="mech-comt" class="choice-label">COMT Inhibition</label>
-                                     <input type="checkbox" id="mech-ache" name="indirectMechanism" value="AChE inhibition" class="choice-input"><label for="mech-ache" class="choice-label">AChE Inhibition</label>
-                                     <input type="checkbox" id="mech-other" name="indirectMechanism" value="Other" class="choice-input"><label for="mech-other" class="choice-label">Other</label>
-                                 </div>
-                             </div>
+                                <label>Indirect Mechanisms</label>
+                                <div class="input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                                    <input type="checkbox" id="mech-release" name="indirectMechanism" value="Release" class="choice-input"><label for="mech-release" class="choice-label">Release</label>
+                                    <input type="checkbox" id="mech-reuptake" name="indirectMechanism" value="Reuptake inhibition" class="choice-input"><label for="mech-reuptake" class="choice-label">Reuptake Inhibition</label>
+                                    <input type="checkbox" id="mech-mao" name="indirectMechanism" value="MAO inhibition" class="choice-input"><label for="mech-mao" class="choice-label">MAO Inhibition</label>
+                                    <input type="checkbox" id="mech-comt" name="indirectMechanism" value="COMT inhibition" class="choice-input"><label for="mech-comt" class="choice-label">COMT Inhibition</label>
+                                    <input type="checkbox" id="mech-ache" name="indirectMechanism" value="AChE inhibition" class="choice-input"><label for="mech-ache" class="choice-label">AChE Inhibition</label>
+                                    <input type="checkbox" id="mech-other" name="indirectMechanism" value="Other" class="choice-input"><label for="mech-other" class="choice-label">Other</label>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Agonism -->
@@ -477,6 +479,9 @@
                             <button type="submit" id="submit-btn" class="btn btn-primary">Submit</button>
                         </div>
                     </form>
+                    <div id="review-button-group" class="button-group hidden">
+                        <button type="button" id="show-answer-btn" class="btn btn-primary">Show Answer</button>
+                    </div>
                 </div>
                 <!-- Card Back (Answer) -->
                 <div class="card-face card-back">
@@ -499,11 +504,12 @@
     <!-- Mode Chooser Modal -->
     <div id="mode-chooser-modal" class="modal-overlay visible">
         <div class="modal-content">
-            <h2>Choose Your Quiz Mode</h2>
-            <p>Select a mode to begin. You can change this at any time using the settings in the header.</p>
-            <div class="button-group">
-                <button id="choose-minimal" class="btn btn-secondary">Minimal</button>
-                <button id="choose-advanced" class="btn btn-primary">Advanced</button>
+            <h2>Choose Your Activity</h2>
+            <p>Select an activity to begin. You can change this at any time in the header.</p>
+            <div class="button-group" style="flex-direction: column;">
+                <button id="choose-review" class="btn btn-primary">Review Flashcards</button>
+                <button id="choose-minimal" class="btn btn-secondary">Minimal Quiz</button>
+                <button id="choose-advanced" class="btn btn-secondary">Advanced Quiz</button>
             </div>
         </div>
     </div>
@@ -547,7 +553,7 @@
                 { name: "Dexmedetomidine (Precedex)", tone: "sympathetic", agonism: "agonist", actionPaths: ["direct"], indirectMechanisms: [], receptors: ["alpha-2"], receptorMap: { "alpha-2": { mode: "direct" } }, tiltOverride: "rest", explanation: "A highly selective central alpha-2 agonist used for sedation and analgesia, reducing sympathetic tone." },
                 { name: "Guanfacine", tone: "sympathetic", agonism: "agonist", actionPaths: ["direct"], indirectMechanisms: [], receptors: ["alpha-2"], receptorMap: { "alpha-2": { mode: "direct" } }, tiltOverride: "rest", explanation: "A selective, centrally-acting alpha-2 agonist used for hypertension and ADHD." },
                 { name: "Guanabenz", tone: "sympathetic", agonism: "agonist", actionPaths: ["direct"], indirectMechanisms: [], receptors: ["alpha-2"], receptorMap: { "alpha-2": { mode: "direct" } }, tiltOverride: "rest", explanation: "A centrally-acting alpha-2 agonist that reduces sympathetic outflow, causing hypotension." },
-                { name: "Alpha-Methyldopa", tone: "sympathetic", agonism: "agonist", actionPaths: ["direct"], indirectMechanisms: [], receptors: ["alpha-2"], receptorMap: { "alpha-2": { mode: "direct" } }, tiltOverride: "rest", explanation: "A prodrug converted to a central alpha-2 agonist; used for hypertension in pregnancy." },
+                { name: "Methyldopa", tone: "sympathetic", agonism: "agonist", actionPaths: ["direct"], indirectMechanisms: [], receptors: ["alpha-2"], receptorMap: { "alpha-2": { mode: "direct" } }, tiltOverride: "rest", explanation: "A prodrug converted to a central alpha-2 agonist; used for hypertension in pregnancy." },
                 { name: "Oxymetazoline", tone: "sympathetic", agonism: "agonist", actionPaths: ["direct"], indirectMechanisms: [], receptors: ["alpha-1", "alpha-2"], receptorMap: { "alpha-1": { mode: "direct" }, "alpha-2": { mode: "direct" } }, explanation: "A direct-acting alpha agonist used as a topical nasal decongestant; can cause rebound congestion." },
                 { name: "Naphazoline", tone: "sympathetic", agonism: "agonist", actionPaths: ["direct"], indirectMechanisms: [], receptors: ["alpha-1", "alpha-2"], receptorMap: { "alpha-1": { mode: "direct" }, "alpha-2": { mode: "direct" } }, explanation: "A direct alpha agonist found in over-the-counter vasoconstrictor eye drops." },
                 { name: "Xylometazoline", tone: "sympathetic", agonism: "agonist", actionPaths: ["direct"], indirectMechanisms: [], receptors: ["alpha-1", "alpha-2"], receptorMap: { "alpha-1": { mode: "direct" }, "alpha-2": { mode: "direct" } }, explanation: "Topical alpha agonist used as a nasal decongestant, similar to oxymetazoline." },
@@ -618,7 +624,8 @@
                 { name: "Soman (GD)", tone: "parasympathetic", agonism: "agonist", actionPaths: ["indirect"], indirectMechanisms: ["AChE inhibition"], receptors: ["M1", "M2", "M3"], receptorMap: { "M1": { mode: "indirect", mechanisms: ["AChE inhibition"] }, "M2": { mode: "indirect", mechanisms: ["AChE inhibition"] }, "M3": { mode: "indirect", mechanisms: ["AChE inhibition"] } }, explanation: "A highly toxic organophosphate nerve agent and irreversible AChE inhibitor, known for rapid 'aging'." },
                 { name: "Tabun (GA)", tone: "parasympathetic", agonism: "agonist", actionPaths: ["indirect"], indirectMechanisms: ["AChE inhibition"], receptors: ["M1", "M2", "M3"], receptorMap: { "M1": { mode: "indirect", mechanisms: ["AChE inhibition"] }, "M2": { mode: "indirect", mechanisms: ["AChE inhibition"] }, "M3": { mode: "indirect", mechanisms: ["AChE inhibition"] } }, explanation: "A highly toxic organophosphate nerve agent and irreversible AChE inhibitor." },
                 { name: "VX", tone: "parasympathetic", agonism: "agonist", actionPaths: ["indirect"], indirectMechanisms: ["AChE inhibition"], receptors: ["M1", "M2", "M3"], receptorMap: { "M1": { mode: "indirect", mechanisms: ["AChE inhibition"] }, "M2": { mode: "indirect", mechanisms: ["AChE inhibition"] }, "M3": { mode: "indirect", mechanisms: ["AChE inhibition"] } }, explanation: "An extremely potent and persistent organophosphate nerve agent and irreversible AChE inhibitor." },
-
+                { name: "Metoclopramide (Reglan)", tone: "parasympathetic", agonism: "agonist", actionPaths: ["indirect"], indirectMechanisms: ["Other"], receptors: ["M1", "M2", "M3"], receptorMap: { "M1": { mode: "indirect", mechanisms: ["Other"] }, "M2": { mode: "indirect", mechanisms: ["Other"] }, "M3": { mode: "indirect", mechanisms: ["Other"] } }, explanation: "Primarily a D2 antagonist, but also acts as a prokinetic by promoting acetylcholine release in the GI tract." },
+                
                 // --- PARASYMPATHOLYTICS (Cholinergic Antagonists) ---
                 { name: "Atropine", tone: "parasympathetic", agonism: "antagonist", actionPaths: ["direct"], indirectMechanisms: [], receptors: ["M1", "M2", "M3"], receptorMap: { "M1": { mode: "direct" }, "M2": { mode: "direct" }, "M3": { mode: "direct" } }, explanation: "A non-selective muscarinic antagonist prototype. Used for bradycardia, reducing secretions, and as an antidote for cholinergic poisoning." },
                 { name: "Scopolamine (Hyoscine)", tone: "parasympathetic", agonism: "antagonist", actionPaths: ["direct"], indirectMechanisms: [], receptors: ["M1", "M2", "M3"], receptorMap: { "M1": { mode: "direct" }, "M2": { mode: "direct" }, "M3": { mode: "direct" } }, explanation: "A muscarinic antagonist with more pronounced CNS effects than atropine. Used for motion sickness and sedation." },
@@ -642,7 +649,6 @@
                 { name: "Imipramine", tone: "parasympathetic", agonism: "antagonist", actionPaths: ["direct"], indirectMechanisms: [], receptors: ["M1", "M2", "M3"], receptorMap: { "M1": { mode: "direct" }, "M2": { mode: "direct" }, "M3": { mode: "direct" } }, explanation: "A tricyclic antidepressant with strong anticholinergic side effects; also blocks reuptake of norepinephrine and serotonin." },
                 { name: "Amitriptyline", tone: "parasympathetic", agonism: "antagonist", actionPaths: ["direct"], indirectMechanisms: [], receptors: ["M1", "M2", "M3"], receptorMap: { "M1": { mode: "direct" }, "M2": { mode: "direct" }, "M3": { mode: "direct" } }, explanation: "A tricyclic antidepressant with strong anticholinergic (muscarinic antagonist) side effects." },
                 { name: "Thioridazine", tone: "parasympathetic", agonism: "antagonist", actionPaths: ["direct"], indirectMechanisms: [], receptors: ["M1", "M2", "M3"], receptorMap: { "M1": { mode: "direct" }, "M2": { mode: "direct" }, "M3": { mode: "direct" } }, explanation: "A typical antipsychotic with strong anticholinergic (muscarinic antagonist) properties." },
-                { name: "Metoclopramide (Reglan)", tone: "parasympathetic", agonism: "agonist", actionPaths: ["indirect"], indirectMechanisms: ["Other"], receptors: ["M1", "M2", "M3"], receptorMap: { "M1": { mode: "indirect", mechanisms: ["Other"] }, "M2": { mode: "indirect", mechanisms: ["Other"] }, "M3": { mode: "indirect", mechanisms: ["Other"] } }, explanation: "Primarily a D2 antagonist, but also acts as a prokinetic by promoting acetylcholine release in the GI tract." },
 
                 // --- GANGLIONIC & NMJ AGENTS ---
                 { name: "Nicotine", tone: "ganglionic", agonism: "agonist", actionPaths: ["direct"], indirectMechanisms: [], receptors: ["Nn", "Nm"], receptorMap: { "Nn": { mode: "direct" }, "Nm": { mode: "direct" } }, tiltOverride: "variable", explanation: "A nicotinic receptor agonist that stimulates both sympathetic and parasympathetic ganglia (Nn) and the neuromuscular junction (Nm)." },
@@ -657,7 +663,7 @@
             // --- STATE --- //
             let state = {
                 currentDrug: null,
-                mode: 'minimal',
+                mode: 'review',
                 session: 'study',
                 isFlipped: false,
                 testCycleCount: 0,
@@ -683,13 +689,17 @@
                 explanationText: document.getElementById('explanation-text'),
                 scoreboard: document.getElementById('scoreboard'),
                 modeToggle: document.getElementById('mode-toggle'),
+                sessionGroup: document.getElementById('session-group'),
                 sessionToggle: document.getElementById('session-toggle'),
                 modeChooserModal: document.getElementById('mode-chooser-modal'),
+                chooseReviewBtn: document.getElementById('choose-review'),
                 chooseMinimalBtn: document.getElementById('choose-minimal'),
                 chooseAdvancedBtn: document.getElementById('choose-advanced'),
                 testResultsModal: document.getElementById('test-results-modal'),
                 testResultsContent: document.getElementById('test-results-content'),
                 closeResultsBtn: document.getElementById('close-results-btn'),
+                reviewButtonGroup: document.getElementById('review-button-group'),
+                showAnswerBtn: document.getElementById('show-answer-btn'),
             };
 
             // --- HELPER FUNCTIONS --- //
@@ -705,9 +715,10 @@
                 if (drug.tiltOverride) return drug.tiltOverride;
                 if (drug.tone === 'sympathetic') {
                     return drug.agonism === 'agonist' ? 'fight' : 'rest';
-                } else { // parasympathetic
+                } else if (drug.tone === 'parasympathetic') {
                     return drug.agonism === 'agonist' ? 'rest' : 'fight';
                 }
+                return 'variable'; // Default for ganglionic
             };
             
             const arrayEquals = (a, b) => {
@@ -717,12 +728,29 @@
             const updateScoreboard = () => {
                  const mastered = state.masteredBank.length;
                  const remaining = state.questionBank.length;
-                 DOMElements.scoreboard.textContent = `Mastered: ${mastered} | Remaining: ${remaining}`;
+                 const total = masterDrugList.length;
+                 if(state.mode === 'review'){
+                    DOMElements.scoreboard.textContent = `${state.questionBank.length > 0 ? (total - remaining + 1) : total} / ${total}`;
+                 } else {
+                    DOMElements.scoreboard.textContent = `Mastered: ${mastered} | Remaining: ${remaining}`;
+                 }
             };
             
             const flipCard = () => {
                 state.isFlipped = !state.isFlipped;
                 DOMElements.flipCard.classList.toggle('is-flipped', state.isFlipped);
+            };
+
+            const updateUIVisibility = () => {
+                const isReview = state.mode === 'review';
+                DOMElements.quizForm.classList.toggle('hidden', isReview);
+                DOMElements.reviewButtonGroup.classList.toggle('hidden', !isReview);
+                DOMElements.sessionGroup.classList.toggle('hidden', isReview);
+                 if(isReview) {
+                    DOMElements.backBtn.classList.add('hidden');
+                 } else {
+                    DOMElements.backBtn.classList.remove('hidden');
+                 }
             };
 
             // --- CORE LOGIC --- //
@@ -746,8 +774,8 @@
                            <label for="${receptorId}" class="choice-label">${receptor}</label>
                            <div id="details-${receptorId}" class="receptor-details hidden">
                                <div class="toggle-switch">
-                                   <button data-value="direct" data-receptor="${receptor}" class="active">Direct</button>
-                                   <button data-value="indirect" data-receptor="${receptor}">Indirect</button>
+                                    <button data-value="direct" data-receptor="${receptor}" class="active">Direct</button>
+                                    <button data-value="indirect" data-receptor="${receptor}">Indirect</button>
                                </div>
                            </div>
                         </div>`;
@@ -788,10 +816,38 @@
                 }
             };
 
+            const displayReviewAnswer = (drug) => {
+                DOMElements.feedbackSection.innerHTML = '';
+                const createRow = (label, value) => `<div class="feedback-row" style="background: none;"><div class="label" style="font-weight: 600;">${label}</div><div class="value">${value || 'N/A'}</div></div>`;
+                
+                let receptorText = drug.receptors.join(', ') || 'None';
+                if (Object.keys(drug.receptorMap).length > 0) {
+                     receptorText = Object.keys(drug.receptorMap).join(', ');
+                }
+
+                DOMElements.feedbackSection.insertAdjacentHTML('beforeend', createRow('Pathway', drug.tone));
+                DOMElements.feedbackSection.insertAdjacentHTML('beforeend', createRow('Action Path', drug.actionPaths.join(', ')));
+                DOMElements.feedbackSection.insertAdjacentHTML('beforeend', createRow('Agonism', drug.agonism));
+                
+                const tilt = calculateTilt(drug);
+                const tiltText = tilt === 'variable' ? 'Variable' : (tilt === 'fight' ? 'Fight-or-Flight' : 'Rest-and-Digest');
+                DOMElements.feedbackSection.insertAdjacentHTML('beforeend', createRow('Net Tilt', tiltText));
+
+                if (drug.indirectMechanisms.length > 0) {
+                    DOMElements.feedbackSection.insertAdjacentHTML('beforeend', createRow('Mechanisms', drug.indirectMechanisms.join(', ')));
+                }
+                DOMElements.feedbackSection.insertAdjacentHTML('beforeend', createRow('Receptors', receptorText));
+            };
+
+
             const loadNewCard = () => {
                 if (state.questionBank.length === 0) {
-                    if (state.masteredBank.length > 0) {
-                        // All questions answered correctly, cycle them back in
+                     if(state.mode === 'review'){
+                        // Restart review mode from the beginning
+                        state.questionBank = [...masterDrugList];
+                        shuffleArray(state.questionBank);
+                    } else if (state.masteredBank.length > 0) {
+                        // All quiz questions answered correctly, cycle them back in
                         state.questionBank = [...state.masteredBank];
                         state.masteredBank = [];
                         shuffleArray(state.questionBank);
@@ -803,12 +859,26 @@
                     }
                 }
                 
-                DOMElements.quizForm.classList.remove('hidden');
+                updateUIVisibility();
                 state.currentDrug = state.questionBank[0]; // Always take the next question from the front
+                if(state.mode !== 'review') {
+                    // For quiz modes, shift the card so it gets evaluated
+                    state.currentDrug = state.questionBank[0];
+                } else {
+                    // For review mode, just show the next card without removing it until 'next' is clicked
+                    state.currentDrug = state.questionBank[0];
+                }
+
                 resetCard();
                 DOMElements.drugNameFront.textContent = state.currentDrug.name;
                 DOMElements.drugNameBack.textContent = state.currentDrug.name;
                 DOMElements.explanationText.textContent = state.currentDrug.explanation;
+                
+                if (state.mode === 'review') {
+                    displayReviewAnswer(state.currentDrug);
+                    DOMElements.explanation.classList.remove('hidden');
+                }
+                
                 updateScoreboard();
             };
 
@@ -859,7 +929,7 @@
                     if (correctReceptors.length > 0) { // Only grade if there are receptors to grade
                         for (const receptor of correctReceptors) {
                              if (!userReceptors.includes(receptor)) {
-                                 allAdvancedCorrect = false; continue;
+                                allAdvancedCorrect = false; continue;
                              }
                             const answer = drug.receptorMap[receptor];
                             const detailsDiv = document.getElementById(`details-receptor-${receptor.replace('-','')}`);
@@ -946,9 +1016,17 @@
                 }
             });
             
-            DOMElements.nextBtn.addEventListener('click', loadNewCard);
+             DOMElements.nextBtn.addEventListener('click', () => {
+                if (state.mode === 'review') {
+                    state.questionBank.shift(); // Move to the next card in review mode
+                }
+                loadNewCard();
+            });
+
             DOMElements.backBtn.addEventListener('click', flipCard);
             DOMElements.resetBtn.addEventListener('click', () => DOMElements.quizForm.reset());
+            DOMElements.showAnswerBtn.addEventListener('click', flipCard);
+
 
             DOMElements.quizForm.querySelector('#action-indirect').addEventListener('change', (e) => {
                 DOMElements.indirectMechContainer.classList.toggle('hidden', !e.target.checked);
@@ -968,20 +1046,17 @@
             setupToggle(DOMElements.modeToggle, 'mode', initializeQuiz);
             setupToggle(DOMElements.sessionToggle, 'session', initializeQuiz);
 
-            DOMElements.chooseMinimalBtn.addEventListener('click', () => {
-                state.mode = 'minimal';
-                DOMElements.modeToggle.querySelector('[data-mode="minimal"]').classList.add('active');
-                DOMElements.modeToggle.querySelector('[data-mode="advanced"]').classList.remove('active');
+            const setMode = (mode) => {
+                state.mode = mode;
+                DOMElements.modeToggle.querySelector('.active').classList.remove('active');
+                DOMElements.modeToggle.querySelector(`[data-mode="${mode}"]`).classList.add('active');
                 DOMElements.modeChooserModal.classList.remove('visible');
                 initializeQuiz();
-            });
-            DOMElements.chooseAdvancedBtn.addEventListener('click', () => {
-                state.mode = 'advanced';
-                DOMElements.modeToggle.querySelector('[data-mode="advanced"]').classList.add('active');
-                DOMElements.modeToggle.querySelector('[data-mode="minimal"]').classList.remove('active');
-                DOMElements.modeChooserModal.classList.remove('visible');
-                initializeQuiz();
-            });
+            };
+
+            DOMElements.chooseReviewBtn.addEventListener('click', () => setMode('review'));
+            DOMElements.chooseMinimalBtn.addEventListener('click', () => setMode('minimal'));
+            DOMElements.chooseAdvancedBtn.addEventListener('click', () => setMode('advanced'));
 
             DOMElements.closeResultsBtn.addEventListener('click', () => {
                 DOMElements.testResultsModal.classList.remove('visible');
@@ -992,16 +1067,24 @@
             window.addEventListener('keydown', (e) => {
                 if (DOMElements.modeChooserModal.classList.contains('visible') || DOMElements.testResultsModal.classList.contains('visible')) return;
                 
-                if (e.key === 'Enter' && !state.isFlipped) DOMElements.submitBtn.click();
+                if (e.key === 'Enter' && !state.isFlipped && state.mode !== 'review') {
+                    DOMElements.submitBtn.click();
+                } else if (e.key === 'Enter' && !state.isFlipped && state.mode === 'review') {
+                    DOMElements.showAnswerBtn.click();
+                }
+                
                 if (e.key.toLowerCase() === 'n' && state.isFlipped) DOMElements.nextBtn.click();
-                if (e.key.toLowerCase() === 'r' && !state.isFlipped) DOMElements.resetBtn.click();
+
+                if (e.key.toLowerCase() === 'r' && !state.isFlipped && state.mode !== 'review') {
+                    DOMElements.resetBtn.click();
+                }
                 
                 const clickElement = (selector) => {
                     const el = DOMElements.quizForm.querySelector(selector);
                     if(el) el.checked = !el.checked;
                 };
 
-                if (!state.isFlipped) {
+                if (!state.isFlipped && state.mode !== 'review') {
                     switch(e.key) {
                         case '1': clickElement('#path-symp'); break;
                         case '2': clickElement('#path-para'); break;
